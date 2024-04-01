@@ -136,7 +136,7 @@ router.get('/allusers', authenticateUser, async (req, res) => {
 
 
 
-router.post('/student/add', authenticateUser, async (req, res) => {
+router.post('/student/add', async (req, res) => {
     try {
         // Extract user ID from the authenticated user
         const userId = req.user.userId;
