@@ -7,14 +7,15 @@ const cors = require("cors")
 
 app.use(cors())
 const UserProfile = require('./routes/user.routes.js')
-const {errorHandler} = require('./middlewares/error.middleware.js')
-// const {authenticateUser} = require('./middlewares/auth.middleware.js')
+const Courses = require('./routes/course.routes.js')
+// const {errorHandler} = require('./middlewares/error.middleware.js')
 app.use(express.json())
 
 
 
 app.use('/auth', authRoute)
 app.use('/user', UserProfile)
+app.use('/courses', Courses)
 
 app.get('/', (_req,res) => {
     res.send("Hello World!!")

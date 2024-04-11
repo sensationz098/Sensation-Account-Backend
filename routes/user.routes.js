@@ -142,7 +142,7 @@ router.post('/student/add', authenticateUser, async (req, res) => {
         const userId = req.user.userId;
         const user = await userModel.findById(userId);
 
-        const { name, email, contact, assignedUserId, isLifetime, course, batch, timing, date_of_payment, state, courseStartDate, courseEndDate, fee, CourseDuration, previousCourses } = req.body;
+        const { name, email, contact, assignedUserId, isLifetime, course, timing, date_of_payment, state, courseStartDate, courseEndDate, fee, CourseDuration, previousCourses } = req.body;
 
         // Check if a student with the same contact and course already exists
         const existingStudent = await studentModel.findOne({ contact, course });
@@ -160,7 +160,6 @@ router.post('/student/add', authenticateUser, async (req, res) => {
             assignedUserId,
             isLifetime,
             course,
-            batch,
             timing,
             date_of_payment,
             state,
@@ -176,16 +175,7 @@ router.post('/student/add', authenticateUser, async (req, res) => {
 
         // Respond with a success message or the newly created student details
         res.status(201).json({
-            message: 'Student added successfully',
-            newStudent: {
-                name: student.name,
-                age: student.age,
-                email: student.email,
-                contact: student.contact,
-                assignedUserId: student.assignedUserId,
-                isLifetime: student.isLifetime,
-                previousCourses: student.previousCourses,
-            },
+            message: 'Student added successfully'
         });
     } catch (error) {
         console.error('Error:', error);
@@ -974,3 +964,10 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
 
 
 module.exports = router;
+
+
+
+
+
+
+
