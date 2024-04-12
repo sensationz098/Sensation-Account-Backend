@@ -1,5 +1,10 @@
 const express = require('express')
 require('dotenv').config()
+const mongoose = require('mongoose');
+const autopopulate = require('mongoose-autopopulate'); // Import the autopopulate plugin
+
+mongoose.plugin(autopopulate); // Enable autopopulate globally
+
 const {connection} = require('./db/db.js')
 const authRoute = require('./routes/auth.routes.js')
 const app = express()
