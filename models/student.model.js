@@ -60,6 +60,9 @@ CourseDuration: {
       default: 0,
       // required: true,
     },
+Teacher : {
+  type: String
+},
 previousCourses: [{
     start: {
       type: Date,
@@ -84,7 +87,6 @@ previousCourses: [{
       default: Date.now(),
       required: true
     }
-   
   }],
 createdAt: {
     type: Date,

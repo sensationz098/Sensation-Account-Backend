@@ -49,7 +49,7 @@ router.post('/login', async (req, res) => {
 
             if (passwordMatch) {
                 // Generate token
-                const token = jwt.sign({ userId: user._id, role: user.role,name: user.username}, process.env.JWT_SECRET, { expiresIn: '200h' });
+                const token = jwt.sign({ userId: user._id, role: user.role,name: user.username}, process.env.JWT_SECRET, { expiresIn: '20m' });
 
                 res.status(200).json({ token, role: user.role, username: user.username });
             } else {

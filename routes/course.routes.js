@@ -1,11 +1,10 @@
 const expres = require('express')
 const router = expres.Router()
 const {courseModel} = require('../models/courses.model');
-const { get } = require('mongoose');
-
+const {authenticateUser} = require('../middlewares/auth.middleware')
 
 // Route to create a new course
-router.post('/add', async(req,res) => {
+router.post('/add', authenticateUser, async(req,res) => {
     try{
      const {coursename} = req.body;
      const courseExist = await courseModel.findOne({coursename});
@@ -24,7 +23,7 @@ router.post('/add', async(req,res) => {
 })
 
 
-router.get('/', async(req,res) => {
+router.get('/', authenticateUser, async(req,res) => {
     try{
        const courses = await courseModel.find()
        res.status(200).json(courses)
@@ -35,7 +34,7 @@ router.get('/', async(req,res) => {
 })
 
 
-router.get('/:id', async(req,res) => {
+router.get('/:id', authenticateUser,  async(req,res) => {
     try{
         const id = req.params.id
       const course = await courseModel.findById(id)
@@ -52,7 +51,7 @@ router.get('/:id', async(req,res) => {
 
 
 // Route to delete a course by ID
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', authenticateUser, async (req, res) => {
     try {
         await courseModel.findByIdAndDelete(req.params.id);
         res.json({ message: 'Course deleted' });
@@ -60,8 +59,6 @@ router.delete('/delete/:id', async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
-
-
 
 
 module.exports = router
