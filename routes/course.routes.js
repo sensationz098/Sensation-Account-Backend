@@ -3,6 +3,8 @@ const router = expres.Router()
 const {courseModel} = require('../models/courses.model');
 const {authenticateUser} = require('../middlewares/auth.middleware')
 
+
+
 // Route to create a new course
 router.post('/add', authenticateUser, async(req,res) => {
     try{
@@ -23,6 +25,7 @@ router.post('/add', authenticateUser, async(req,res) => {
 })
 
 
+
 router.get('/', authenticateUser, async(req,res) => {
     try{
        const courses = await courseModel.find()
@@ -32,6 +35,7 @@ router.get('/', authenticateUser, async(req,res) => {
        res.status(500).json({msg: err.message})
     }
 })
+
 
 
 router.get('/:id', authenticateUser,  async(req,res) => {
@@ -50,6 +54,7 @@ router.get('/:id', authenticateUser,  async(req,res) => {
 })
 
 
+
 // Route to delete a course by ID
 router.delete('/delete/:id', authenticateUser, async (req, res) => {
     try {
@@ -61,4 +66,13 @@ router.delete('/delete/:id', authenticateUser, async (req, res) => {
 });
 
 
+
 module.exports = router
+
+
+
+
+
+
+
+
