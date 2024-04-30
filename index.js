@@ -15,6 +15,7 @@ app.use(cors())
 const UserProfile = require('./routes/user.routes.js')
 const Courses = require('./routes/course.routes.js')
 const Teachers = require('./routes/teachers.routes.js')
+const Upload = require('./routes/fileUpload.routes.js')
 
 
 
@@ -24,6 +25,8 @@ app.use('/auth', authRoute)
 app.use('/user', UserProfile)
 app.use('/courses', Courses)
 app.use('/teachers', Teachers)
+app.use('/fileupload', Upload)
+
 
 app.get('/', (_req,res) => {
     res.send("Hello World!!")
