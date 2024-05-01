@@ -58,18 +58,24 @@ router.post('/upload', upload.single('excelfile'), async (req, res) => {
 
         mappedData.forEach(row => {
             console.log('Before formatting:', row); // Log the row before formatting
-            if (row.dateofpayment) {
-                row.dateofpayment = moment(xlsx.SSF.parse_date_code(row.dateofpayment), 'MM/DD/YY').toISOString();
-            }
-            if (row.coursestartdate) {
-                row.coursestartdate = moment(xlsx.SSF.parse_date_code(row.coursestartdate), 'MM/DD/YY').toISOString();
-            }
-            if (row.courseenddate) {
-                row.courseenddate = moment(xlsx.SSF.parse_date_code(row.courseenddate), 'MM/DD/YY').toISOString();
-            }
+            Object.keys(row).forEach(field => {
+                // Check if the field is a date field
+                if (field === 'dateofpayment' || field === 'coursestartdate' || field === 'courseenddate') {
+                    const dateValue = row[field];
+                    // Parse the date value based on different formats
+                    const momentDate = moment(dateValue, ['YYYY-MM-DD', 'MM/DD/YYYY']);
+                    // Check if the date is valid
+                    if (momentDate.isValid()) {
+                        // Assign the formatted date to the field
+                        row[field] = momentDate.toISOString();
+                    } else {
+                        // Handle invalid date format
+                        console.error('Invalid date format:', dateValue);
+                    }
+                }
+            });
             console.log('After formatting:', row); // Log the row after formatting
         });
-        
 
         // Save the mapped data to the database
         await studentModel.insertMany(mappedData);

@@ -25,25 +25,21 @@ const studentSchema = mongoose.Schema({
   course: {
     type: String,
   },
-  batch: {
-    type: String,
-    // required: true,
-  },
   timing: {
     type: String,
     // required: true,
   },
   date_of_payment: {
     type: Date,
-    default: null,
+    // default: null,
   },
   courseStartDate: {
     type: Date,
-    default: null,
+    // default: null,
   },
   courseEndDate: {
     type: Date,
-    default: null,
+    // default: null,
   },
   fee: {
     type: String,
