@@ -301,85 +301,6 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
 
 
 
-// router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
-//     try {
-//         // Extract user ID from the authenticated user
-//         const userId = req.user.userId;
-
-//         // Retrieve user details to check for role (optional, depending on your requirements)
-//         const user = await userModel.findById(userId);
-
-//         // Extract student ID from the request parameters
-//         const studentId = req.params.studentId;
-
-//         // Find the student by ID
-//         const student = await studentModel.findById(studentId);
-
-//         if (!student) {
-//             return res.status(404).json({ message: 'Student not found' });
-//         }
-
-//         // Capture the current course details before making any changes
-//         const currentCourse = {
-//             start: new Date(student.courseStartDate),
-//             end: new Date(student.courseEndDate),
-//         };
-
-//         // Assign the userId to the student
-//         student.userId = userId;
-//         student.extended = true;
-
-//         // Validate and parse additional course duration, amount, and date_of_payment from the request body
-//         const { additionalMonths, amount, date_of_payment } = req.body;
-
-//         if (!additionalMonths || isNaN(additionalMonths) || additionalMonths <= 0) {
-//             return res.status(400).json({ message: 'Invalid or missing additional course duration' });
-//         }
-
-//         if (!amount || isNaN(amount) || amount <= 0) {
-//             return res.status(400).json({ message: 'Invalid or missing amount' });
-//         }
-
-//         if (!date_of_payment || isNaN(Date.parse(date_of_payment))) {
-//             return res.status(400).json({ message: 'Invalid or missing date_of_payment' });
-//         }
-
-//         // Calculate the new end date based on the additional months
-//         const newEndDate = new Date(student.courseEndDate);
-//         newEndDate.setFullYear(newEndDate.getFullYear(), newEndDate.getMonth() + additionalMonths);
-
-//         // Update course details
-//         student.CourseDuration += additionalMonths;
-//         student.courseEndDate = newEndDate;
-
-//         // Log information for debugging
-//         // console.log('Current course end date:', student.courseEndDate);
-//         // console.log('Additional months:', additionalMonths);
-//         // console.log('New end date:', newEndDate);
-
-//         // Record the previous course details
-//         student.previousCourses.push({
-//             start: currentCourse.start,
-//             end: currentCourse.end,
-//             amount: amount,
-//             extendedBy: additionalMonths,
-//             date_of_payment: new Date(date_of_payment),
-//         });
-
-//         // Save the changes to the database
-//         await student.save();
-
-//         // Respond with a success message or the updated student details
-//         res.status(200).json({
-//             message: 'Course extended successfully',
-//             updatedStudent: student,
-//         });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Internal Server Error' });
-//     }
-// });
-
 
 router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
     try {
@@ -723,159 +644,24 @@ router.get('/allstudents', authenticateUser, async (req, res) => {
 });
 
 
-
-
-// router.get('/display-and-download', authenticateUser, async (req, res) => {
-//     try {
-//         const currentDate = new Date();
-//         const currentYear = currentDate.getFullYear();
-//         const currentMonth = currentDate.getMonth(); // JavaScript months are 0-indexed
-
-//         const nextMonthDate = new Date(currentYear, currentMonth + 1, 1);
-
-//         // Date Filtering Optimization
-//         const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(`${currentYear}-${currentMonth + 1}-01`);
-//         const endDate = req.query.endDate ? new Date(req.query.endDate) : nextMonthDate;
-
-//         const filterCriteria = {
-//             'courseEndDate': {
-//                 $gte: new Date(`${currentYear}-${currentMonth + 1}-01`),
-//                 $lt: new Date(`${currentYear}-${currentMonth + 1}-31`),
-//             },
-//         };
-        
-
-//         console.log("Filter Criteria:", filterCriteria);
-
-
-//         // Fetch data based on filter criteria
-//         const students = await studentModel.find(filterCriteria).lean();
-//         console.log("Students:", students);
-        
-
-//         const validStudents = students.filter(student => {
-//             return student.courseEndDate instanceof Date && !isNaN(student.courseEndDate.valueOf());
-//         });
-
-//         if (req.query.download === 'true') {
-//             try {
-//                 // Create Excel file and download
-//                 const workbook = new exceljs.Workbook();
-//                 const worksheet = workbook.addWorksheet('Students');
-
-//                 // Function to format date
-//                 const formatDate = (date) => {
-//                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-//                     return date.toLocaleDateString('en-US', options).replace(/ /g, '/');
-//                 };
-
-//                 const columns = [
-//                     { header: 'Name', key: 'name', width: 15 },
-//                     { header: 'Contact', key: 'contact', width: 15 },
-//                     { header: 'Email', key: 'email', width: 15 },
-//                     { header: 'Course', key: 'course', width: 15 },
-//                     { header: 'Course Start Date', key: 'courseStartDate', width: 15 },
-//                     { header: 'Course End Date', key: 'courseEndDate', width: 15 },
-//                     { header: 'Fee', key: 'fee', width: 10 },
-//                     { header: 'isLifetime', key: 'isLifetime', width: 10},
-//                     { header: 'AssignedUser', key: 'AssignedUserId', width: 100},
-//                     { header: 'UserId', key: 'UserId', width: 100},
-//                     { header: 'Course Duration', key: 'CourseDuration', width: 15 },
-//                     { header: 'Course Extended', key: 'courseExtended', width: 15 },
-//                 ];
-
-//                 // Add dynamic columns for PreviousCourses only if there are previous courses
-//                 students.forEach(student => {
-//                     // console.log(student.courseEndDate);
-//                     if (isNaN(new Date(student.courseEndDate).valueOf())) {
-//                         console.log('Invalid Date:', student);
-//                     }
-//                     if (student.previousCourses && student.previousCourses.length > 0) {
-//                         student.previousCourses.forEach((previousCourse, index) => {
-//                             const columnKey = `prevCourseEndDate${index + 1}`;
-
-//                             // Check if the column is already added
-//                             const isColumnExists = columns.some(column => column.key === columnKey);
-
-//                             if (!isColumnExists) {
-//                                 columns.push({
-//                                     header: `Prev Course ${index + 1} End Date`,
-//                                     key: columnKey,
-//                                     width: 15,
-//                                 });
-//                             }
-//                         });
-//                     }
-//                 });
-
-//                 // Set columns in the worksheet
-//                 worksheet.columns = columns;
-
-//                 // Add data to the worksheet
-//                 students.forEach(student => {
-//                     student.previousCourses.forEach(previousCourse => {
-//                         const isCourseExtended = student.previousCourses && student.previousCourses.length >= 1;
-//                         const data = {
-//                             name: student.name,
-//                             contact: student.contact,
-//                             email: student.email,
-//                             course: previousCourse.course,
-//                             courseStartDate: formatDate(previousCourse.courseStartDate),
-//                             courseEndDate: formatDate(previousCourse.courseEndDate),
-//                             fee: previousCourse.fee,
-//                             CourseDuration: previousCourse.CourseDuration,
-//                             courseExtended: isCourseExtended ? 'Yes' : 'No',
-//                         };
-
-//                         // Add data for PreviousCourses only if there are previous courses
-//                         if (student.previousCourses && student.previousCourses.length > 0) {
-//                             student.previousCourses.forEach((prevCourse, index) => {
-//                                 data[`prevCourseEndDate${index + 1}`] = formatDate(new Date(prevCourse.end));
-//                             });
-//                         }
-
-//                         worksheet.addRow(data);
-//                     });
-//                 });
-
-//                 // Set up response headers
-//                 res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-//                 res.setHeader('Content-Disposition', 'attachment; filename=students.xlsx');
-
-//                 // Streaming Excel generation
-//                 await workbook.xlsx.write(res);
-//                 res.end();
-//             } catch (error) {
-//                 console.error('Error downloading Excel:', error);
-//                 res.status(500).send('Internal Server Error');
-//             }
-//         } else {
-//             // Send JSON response to frontend
-//             res.json({ length: validStudents.length, students: validStudents });
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// });
-
-
-
-
 router.get('/display-and-download', authenticateUser,  async (req, res) => {
     try {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         const currentMonth = currentDate.getMonth(); // JavaScript months are 0-indexed
-
-        const nextMonthDate = new Date(currentYear, currentMonth + 1, 1);
-
+        
+        // Calculate next month's date, accounting for year change
+        const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+        const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+        const nextMonthDate = new Date(nextMonthYear, nextMonth, 1);
+        
         let filterCriteria = {
             'courseEndDate': {
-                $gte: new Date(`${currentYear}-${currentMonth + 1}-01`),
+                $gte: new Date(currentYear, currentMonth, 1),
                 $lt: nextMonthDate,
             },
         };
+        
 
         console.log(filterCriteria);
 
