@@ -903,7 +903,15 @@ const setFilterCriteria = (req) => {
 router.get("/displaydownload", authenticateUser, async (req, res) => {
     try {
         const filterCriteria = setFilterCriteria(req);
-        const students = await studentModel.find(filterCriteria).lean();
+        const page = req.query.page ? parseInt(req.query.page) : 1; // Default page is 1
+        const limit = 100; // Limit of records per page
+
+        const skip = (page - 1) * limit; // Calculate number of records to skip
+
+        // Query to count total number of records
+        const totalRecords = await studentModel.countDocuments(filterCriteria);
+
+        const students = await studentModel.find(filterCriteria).skip(skip).limit(limit).lean();
 
         if (req.query.download === 'true') {
             try {
@@ -919,24 +927,6 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
                 const columns = [
                     // ... (existing columns)
                 ];
-
-                students.forEach(student => {
-                    if (student.previousCourses && student.previousCourses.length > 0) {
-                        student.previousCourses.forEach((previousCourse, index) => {
-                            const columnKey = `prevCourseEndDate${index + 1}`;
-
-                            const isColumnExists = columns.some(column => column.key === columnKey);
-
-                            if (!isColumnExists) {
-                                columns.push({
-                                    header: `Prev Course ${index + 1} End Date`,
-                                    key: columnKey,
-                                    width: 15,
-                                });
-                            }
-                        });
-                    }
-                });
 
                 worksheet.columns = columns;
 
@@ -975,7 +965,11 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
                 res.status(500).send('Internal Server Error');
             }
         } else {
-            res.json({ length: students.length, students });
+            // Calculate total pages
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            // Send paginated data and total pages to client
+            res.json({ currentPage: page, totalPages: totalPages, students });
         }
     } catch (error) {
         console.error('Error:', error);

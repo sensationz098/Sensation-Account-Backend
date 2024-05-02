@@ -25,6 +25,9 @@ const studentSchema = mongoose.Schema({
   course: {
     type: String,
   },
+  reciept: {
+    type: Number
+  },
   timing: {
     type: String,
     // required: true,
