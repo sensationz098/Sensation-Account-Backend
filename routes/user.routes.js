@@ -644,7 +644,7 @@ router.get('/allstudents', authenticateUser, async (req, res) => {
 });
 
 
-router.get('/display-and-download', authenticateUser,  async (req, res) => {
+router.get('/display-and-download', authenticateUser, async (req, res) => {
     try {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
@@ -662,9 +662,6 @@ router.get('/display-and-download', authenticateUser,  async (req, res) => {
             },
         };
         
-
-        console.log(filterCriteria);
-
         // Check if date range is provided in the request
         if (req.query.startDate && req.query.endDate) {
             filterCriteria = {
@@ -673,7 +670,7 @@ router.get('/display-and-download', authenticateUser,  async (req, res) => {
                     $lt: new Date(req.query.endDate),
                 },
             };
-        }else if(req.query.startDate===null && req.query.endDate===null){
+        } else if (!req.query.startDate && !req.query.endDate) {
             filterCriteria = {
                 'courseEndDate': {
                     $gte: new Date(`${currentYear}-${currentMonth + 1}-01`),
@@ -682,28 +679,33 @@ router.get('/display-and-download', authenticateUser,  async (req, res) => {
             };
         }
 
-        console.log(filterCriteria);
-
         // Fetch data based on filter criteria
         const students = await studentModel.find(filterCriteria).lean();
-        console.log(students);
-
 
         const validStudents = students.filter(student => {
             return student.courseEndDate instanceof Date && !isNaN(student.courseEndDate.valueOf());
         });
 
-if (req.query.download === 'true') {
-    try {
-        // Create Excel file and download
-        const workbook = new exceljs.Workbook();
-        const worksheet = workbook.addWorksheet('Students');
+        // Pagination
+        const page = req.query.page ? parseInt(req.query.page) : 1;
+        const limit = 500; // Number of records per page
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        const totalRecords = validStudents.length;
+        const totalPages = Math.ceil(totalRecords / limit);
+
+        const paginatedStudents = validStudents.slice(startIndex, endIndex);
+
+        if (req.query.download === 'true') {
+            try {
+                // Create Excel file and download
+                const workbook = new exceljs.Workbook();
+                const worksheet = workbook.addWorksheet('Students');
 
                 const formatDate = (date) => {
                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
                     return date.toLocaleDateString('en-US', options).replace(/ /g, '/');
                 };
-
 
                 const columns = [
                     { header: 'Name', key: 'name', width: 15 },
@@ -713,26 +715,16 @@ if (req.query.download === 'true') {
                     { header: 'Course Start Date', key: 'courseStartDate', width: 15 },
                     { header: 'Course End Date', key: 'courseEndDate', width: 15 },
                     { header: 'Fee', key: 'fee', width: 10 },
-                    { header: 'isLifetime', key: 'isLifetime', width: 10},
-                    { header: 'AssignedUser', key: 'AssignedUserId', width: 100},
-                    { header: 'UserId', key: 'UserId', width: 100},
                     { header: 'Course Duration', key: 'CourseDuration', width: 15 },
                     { header: 'Course Extended', key: 'courseExtended', width: 15 },
                 ];
 
                 // Add dynamic columns for PreviousCourses only if there are previous courses
-                students.forEach(student => {
-                    console.log(student.courseEndDate);
-                    if (isNaN(new Date(student.courseEndDate).valueOf())) {
-                        console.log('Invalid Date:', student);
-                    }
+                paginatedStudents.forEach(student => {
                     if (student.previousCourses && student.previousCourses.length > 0) {
                         student.previousCourses.forEach((previousCourse, index) => {
                             const columnKey = `prevCourseEndDate${index + 1}`;
-
-                            // Check if the column is already added
                             const isColumnExists = columns.some(column => column.key === columnKey);
-
                             if (!isColumnExists) {
                                 columns.push({
                                     header: `Prev Course ${index + 1} End Date`,
@@ -748,7 +740,7 @@ if (req.query.download === 'true') {
                 worksheet.columns = columns;
 
                 // Add data to the worksheet
-                students.forEach(student => {
+                paginatedStudents.forEach(student => {
                     student.previousCourses.forEach(previousCourse => {
                         const isCourseExtended = student.previousCourses && student.previousCourses.length >= 1;
                         const data = {
@@ -781,13 +773,13 @@ if (req.query.download === 'true') {
                 // Send the workbook as the response
                 await workbook.xlsx.write(res);
                 res.end();
-               } catch (error) {
+            } catch (error) {
                 console.error('Error downloading Excel:', error);
                 res.status(500).send('Internal Server Error');
             }
         } else {
-            // Send JSON response to frontend
-            res.json({ length: validStudents.length, students: validStudents });
+            // Send JSON response with pagination information
+            res.json({ currentPage: page, totalPages: totalPages, students: paginatedStudents });
         }
     } catch (error) {
         console.error('Error:', error);
