@@ -904,7 +904,7 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
     try {
         const filterCriteria = setFilterCriteria(req);
         const page = req.query.page ? parseInt(req.query.page) : 1; // Default page is 1
-        const limit = 100; // Limit of records per page
+        const limit = 500; // Limit of records per page
 
         const skip = (page - 1) * limit; // Calculate number of records to skip
 
@@ -976,6 +976,18 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
+router.get('/students/count', async (req, res) => {
+    try {
+      const count = await studentModel.countDocuments();
+      res.json({ count });
+    } catch (error) {
+      console.error('Error calculating students count:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 
 
 
