@@ -1,7 +1,7 @@
 const express = require('express')
 const exceljs = require('exceljs')
 const moment = require('moment')
-
+                               
 const router = express.Router()
 const bcrypt = require('bcrypt');
 const {userModel} = require('../models/user.model')
@@ -301,7 +301,6 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
 
 
 
-
 router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
     try {
         // Extract user ID from the authenticated user
@@ -383,7 +382,6 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
-
 
 
 
@@ -740,7 +738,7 @@ router.get('/display-and-download', authenticateUser, async (req, res) => {
                 worksheet.columns = columns;
 
                 // Add data to the worksheet
-                paginatedStudents.forEach(student => {
+                students.forEach(student => {
                     student.previousCourses.forEach(previousCourse => {
                         const isCourseExtended = student.previousCourses && student.previousCourses.length >= 1;
                         const data = {
@@ -787,21 +785,6 @@ router.get('/display-and-download', authenticateUser, async (req, res) => {
     }
 });
 
-
-
-
-router.delete('/students/delete-all', authenticateUser, async (req, res) => {
-    try {
-        // Delete all students
-        await studentModel.deleteMany({});
-
-        // Respond with a success message
-        res.status(200).json({ message: 'All students deleted successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-});
 
 
 const setFilterCriteria = (req) => {
@@ -970,16 +953,111 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
 });
 
 
+// router.get('/testing', authenticateUser, async (req, res) => {
+//     try {
+//         // Calculate current date without time
+//         const currentDate = new Date();
+//         currentDate.setHours(0, 0, 0, 0); // Set time to midnight
+
+//         // Calculate date two days ahead without time
+//         const twoDaysAhead = new Date(currentDate);
+//         twoDaysAhead.setDate(twoDaysAhead.getDate() + 2);
+//         twoDaysAhead.setHours(0, 0, 0, 0); // Set time to midnight
+
+//         // Construct filter criteria
+//         const filterCriteria = {
+//             'courseEndDate': {
+//                 $gte: twoDaysAhead, // Using twoDaysAhead instead of currentDate
+//                 $lt: new Date(twoDaysAhead.getTime() + 86400000), // Adding 24 hours to get the next day
+//             },
+//         };
+
+//         // Fetch data based on filter criteria
+//         const students = await studentModel.find(filterCriteria).lean();
+
+//         // Send JSON response with fetched data
+//         res.json({ length: students.length, students });
+
+//     } catch (error) {
+//         console.error('Error:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
+
+
+router.get('/students/testing', authenticateUser, async (req, res) => {
+    try {
+        // Extracting start and end dates from query parameters
+        let startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+        let endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+
+        // Calculate current date without time
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0); // Set time to midnight
+
+        // Calculate date two days ahead without time
+        const twoDaysAhead = new Date(currentDate);
+        twoDaysAhead.setDate(twoDaysAhead.getDate() + 2);
+        twoDaysAhead.setHours(0, 0, 0, 0); // Set time to midnight
+
+        // If start date is not provided or is invalid, set it to twoDaysAhead
+        if (!startDate || isNaN(startDate.getTime())) {
+            startDate = twoDaysAhead;
+        }
+
+        // If end date is not provided or is invalid, set it to next day of startDate
+        if (!endDate || isNaN(endDate.getTime())) {
+            endDate = new Date(startDate.getTime() + 86400000); // Adding 24 hours to get the next day
+        }
+
+        // Construct filter criteria
+        const filterCriteria = {
+            'courseEndDate': {
+                $gte: startDate,
+                $lt: endDate,
+            },
+        };
+
+        // Fetch data based on filter criteria
+        const students = await studentModel.find(filterCriteria).lean();
+
+        // Send JSON response with fetched data
+        res.json({ length: students.length, students });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
+
+// router.delete('/students/delete-all', async (req, res) => {
+//     try {
+//       // Delete all students
+//       await studentModel.deleteMany({});
+//       res.status(200).json({ message: 'All students deleted successfully.' });
+//     } catch (err) {
+//       console.error(err);
+//       res.status(500).json({ message: 'An error occurred while deleting students.' });
+//     }
+//   });
+
+
+
+
 router.get('/students/count', async (req, res) => {
     try {
-      const count = await studentModel.countDocuments();
-      res.json({ count });
-    } catch (error) {
-      console.error('Error calculating students count:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      // Count total students
+      const totalStudentsCount = await studentModel.countDocuments();
+      res.status(200).json({ totalStudents: totalStudentsCount });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'An error occurred while counting students.' });
     }
   });
-  
 
 
 

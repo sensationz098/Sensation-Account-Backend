@@ -30,23 +30,22 @@ const studentSchema = mongoose.Schema({
   },
   timing: {
     type: String,
-    // required: true,
+    default: 'Not Confirmed'
   },
   date_of_payment: {
     type: Date,
-    // default: null,
+    default: null,
   },
   courseStartDate: {
     type: Date,
-    // default: null,
+    default: null,
   },
   courseEndDate: {
     type: Date,
-    // default: null,
+    default: null,
   },
   fee: {
     type: String,
-    // required: true,
   },
   CourseDuration: {
     type: String,
