@@ -552,43 +552,6 @@ router.get('/students/filter', authenticateUser, async (req, res) => {
 
 
 
-// ADDING STUDENT BY ADMIN SIDE
-router.post('/admin/addStudent', authenticateUser, async(req,res) => {
-    try{
-       const {name, email, contact, enrolledCourses, assignedUsername} = req.body;
-      const assignedUser = await userModel.findOne({username: assignedUsername})
-
-      if(!assignedUser){
-        return res.status(404).json({msg: 'User not found'})
-      }
-
-      const student = new studentModel({
-        name, 
-        email, 
-        contact, 
-        enrolledCourses, 
-        userId: assignedUser._id,
-        })
-        await student.save();
-
-        res.status(200).json({
-            msg: 'Student added successfully',
-            newStudent: {
-               name: student.name,
-               email: student.email,
-               contact: student.contact,
-               enrolledCourses: student.enrolledCourses
-            }
-        })
-    }
-    catch(err){
-        console.error(err)
-        res.status(500).json({msg: 'Internal Server Error'})
-    }
-})
-
-
-
 // To ASSIGNED A USER TO THE STUDENT FROM ADMIN SIDE
 router.post('/admin/student/assignUser', authenticateUser, async (req, res) => {
     try {
@@ -640,6 +603,7 @@ router.get('/allstudents', authenticateUser, async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
+
 
 
 router.get('/display-and-download', authenticateUser, async (req, res) => {
@@ -768,7 +732,6 @@ router.get('/display-and-download', authenticateUser, async (req, res) => {
                 res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 res.setHeader('Content-Disposition', 'attachment; filename=students.xlsx');
 
-                // Send the workbook as the response
                 await workbook.xlsx.write(res);
                 res.end();
             } catch (error) {
@@ -776,7 +739,6 @@ router.get('/display-and-download', authenticateUser, async (req, res) => {
                 res.status(500).send('Internal Server Error');
             }
         } else {
-            // Send JSON response with pagination information
             res.json({ currentPage: page, totalPages: totalPages, students: paginatedStudents });
         }
     } catch (error) {
@@ -875,6 +837,8 @@ const setFilterCriteria = (req) => {
     return filterCriteria;
 };
 
+
+
 router.get("/displaydownload", authenticateUser, async (req, res) => {
     try {
         const filterCriteria = setFilterCriteria(req);
@@ -953,37 +917,6 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
 });
 
 
-// router.get('/testing', authenticateUser, async (req, res) => {
-//     try {
-//         // Calculate current date without time
-//         const currentDate = new Date();
-//         currentDate.setHours(0, 0, 0, 0); // Set time to midnight
-
-//         // Calculate date two days ahead without time
-//         const twoDaysAhead = new Date(currentDate);
-//         twoDaysAhead.setDate(twoDaysAhead.getDate() + 2);
-//         twoDaysAhead.setHours(0, 0, 0, 0); // Set time to midnight
-
-//         // Construct filter criteria
-//         const filterCriteria = {
-//             'courseEndDate': {
-//                 $gte: twoDaysAhead, // Using twoDaysAhead instead of currentDate
-//                 $lt: new Date(twoDaysAhead.getTime() + 86400000), // Adding 24 hours to get the next day
-//             },
-//         };
-
-//         // Fetch data based on filter criteria
-//         const students = await studentModel.find(filterCriteria).lean();
-
-//         // Send JSON response with fetched data
-//         res.json({ length: students.length, students });
-
-//     } catch (error) {
-//         console.error('Error:', error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// });
-
 
 
 router.get('/students/testing', authenticateUser, async (req, res) => {
@@ -1022,29 +955,106 @@ router.get('/students/testing', authenticateUser, async (req, res) => {
         // Fetch data based on filter criteria
         const students = await studentModel.find(filterCriteria).lean();
 
-        // Send JSON response with fetched data
-        res.json({ length: students.length, students });
+        // Default data if no dates are provided or no students found
+        if (students.length === 0) {
+            const defaultFilterCriteria = {
+                'courseEndDate': {
+                    $gte: new Date(currentYear, currentMonth, 1),
+                    $lt: nextMonthDate,
+                },
+            };
+            const defaultStudents = await studentModel.find(defaultFilterCriteria).lean();
+            students.push(...defaultStudents);
+        }
 
+        if (req.query.download === 'true') {
+            try {
+                // Create Excel file and download
+                const workbook = new exceljs.Workbook();
+                const worksheet = workbook.addWorksheet('Students');
+
+                const formatDate = (date) => {
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    return date.toLocaleDateString('en-US', options).replace(/ /g, '/');
+                };
+
+                const columns = [
+                    { header: 'Name', key: 'name', width: 15 },
+                    { header: 'Contact', key: 'contact', width: 15 },
+                    { header: 'Email', key: 'email', width: 15 },
+                    { header: 'Course', key: 'course', width: 15 },
+                    { header: 'Course Start Date', key: 'courseStartDate', width: 15 },
+                    { header: 'Course End Date', key: 'courseEndDate', width: 15 },
+                    { header: 'Fee', key: 'fee', width: 10 },
+                    { header: 'Course Duration', key: 'CourseDuration', width: 15 },
+                    { header: 'Course Extended', key: 'courseExtended', width: 15 },
+                ];
+
+                // Add dynamic columns for PreviousCourses only if there are previous courses
+                students.forEach(student => {
+                    if (student.previousCourses && student.previousCourses.length > 0) {
+                        student.previousCourses.forEach((previousCourse, index) => {
+                            const columnKey = `prevCourseEndDate${index + 1}`;
+                            const isColumnExists = columns.some(column => column.key === columnKey);
+                            if (!isColumnExists) {
+                                columns.push({
+                                    header: `Prev Course ${index + 1} End Date`,
+                                    key: columnKey,
+                                    width: 15,
+                                });
+                            }
+                        });
+                    }
+                });
+
+                // Set columns in the worksheet
+                worksheet.columns = columns;
+
+                // Add data to the worksheet
+                students.forEach(student => {
+                    student.previousCourses.forEach(previousCourse => {
+                        const isCourseExtended = student.previousCourses && student.previousCourses.length >= 1;
+                        const data = {
+                            name: student.name,
+                            contact: student.contact,
+                            email: student.email,
+                            course: previousCourse.course,
+                            courseStartDate: formatDate(previousCourse.courseStartDate),
+                            courseEndDate: formatDate(previousCourse.courseEndDate),
+                            fee: previousCourse.fee,
+                            CourseDuration: previousCourse.CourseDuration,
+                            courseExtended: isCourseExtended ? 'Yes' : 'No',
+                        };
+
+                        // Add data for PreviousCourses only if there are previous courses
+                        if (student.previousCourses && student.previousCourses.length > 0) {
+                            student.previousCourses.forEach((prevCourse, index) => {
+                                data[`prevCourseEndDate${index + 1}`] = formatDate(new Date(prevCourse.end));
+                            });
+                        }
+
+                        worksheet.addRow(data);
+                    });
+                });
+
+                // Set up response headers
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                res.setHeader('Content-Disposition', 'attachment; filename=students.xlsx');
+
+                await workbook.xlsx.write(res);
+                res.end();
+            } catch (error) {
+                console.error('Error downloading Excel:', error);
+                res.status(500).send('Internal Server Error');
+            }
+        } else {
+            res.json({ length: students.length, students });
+        }
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-
-
-
-// router.delete('/students/delete-all', async (req, res) => {
-//     try {
-//       // Delete all students
-//       await studentModel.deleteMany({});
-//       res.status(200).json({ message: 'All students deleted successfully.' });
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ message: 'An error occurred while deleting students.' });
-//     }
-//   });
-
 
 
 
@@ -1057,15 +1067,8 @@ router.get('/students/count', async (req, res) => {
       console.error(err);
       res.status(500).json({ message: 'An error occurred while counting students.' });
     }
-  });
+});
 
 
 
 module.exports = router;
-
-
-
-
-
-
-
