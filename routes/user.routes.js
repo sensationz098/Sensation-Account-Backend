@@ -142,7 +142,7 @@ router.post('/student/add', authenticateUser, async (req, res) => {
         const userId = req.user.userId;
         const user = await userModel.findById(userId);
 
-        const { name, email, contact, assignedUserId, isLifetime, course, timing, date_of_payment, state, courseStartDate,Teacher, courseEndDate, fee, CourseDuration, previousCourses } = req.body;
+        const { name, email, contact, assignedUserId, isLifetime, course, timing, date_of_payment, state, courseStartDate,Teacher, courseEndDate, fee, CourseDuration, receipt,  previousCourses } = req.body;
 
         // Check if a student with the same contact and course already exists
         const existingStudent = await studentModel.findOne({ contact, course });
@@ -167,6 +167,7 @@ router.post('/student/add', authenticateUser, async (req, res) => {
             courseEndDate,
             fee,
             CourseDuration,
+            receipt,
             Teacher,
             previousCourses,
         });
@@ -918,7 +919,6 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
 
 
 
-
 router.get('/students/testing', authenticateUser, async (req, res) => {
     try {
         // Extracting start and end dates from query parameters
@@ -954,6 +954,13 @@ router.get('/students/testing', authenticateUser, async (req, res) => {
 
         // Fetch data based on filter criteria
         const students = await studentModel.find(filterCriteria).lean();
+
+        // Define currentYear and currentMonth
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth();
+
+        // Define nextMonthDate as the first day of the next month
+        const nextMonthDate = new Date(currentYear, currentMonth + 1, 1);
 
         // Default data if no dates are provided or no students found
         if (students.length === 0) {
@@ -1057,7 +1064,6 @@ router.get('/students/testing', authenticateUser, async (req, res) => {
 });
 
 
-
 router.get('/students/count', async (req, res) => {
     try {
       // Count total students
@@ -1070,5 +1076,14 @@ router.get('/students/count', async (req, res) => {
 });
 
 
+router.delete('/students/all', async (req, res) => {
+    try {
+      const result = await studentModel.deleteMany({});
+      res.json({ message: "All student data deleted successfully", deletedCount: result.deletedCount });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server Error" });
+    }
+  });
 
 module.exports = router;

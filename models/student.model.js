@@ -11,6 +11,10 @@ const studentSchema = mongoose.Schema({
     type: String,
     default: null,
   },
+  receipt :  {
+    type: String,
+    default: 'NA'
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -24,9 +28,7 @@ const studentSchema = mongoose.Schema({
   },
   course: {
     type: String,
-  },
-  reciept: {
-    type: Number
+    default: 'NA'
   },
   timing: {
     type: String,
@@ -46,15 +48,18 @@ const studentSchema = mongoose.Schema({
   },
   fee: {
     type: String,
+    default: 'NA'
   },
   CourseDuration: {
     type: String,
+    default: 'NA'
   },
   Teacher: {
     type: String,
+    default: "Not Confirmed"
   },
   assignedUserName: {
-    type: String
+    type: String,
   },
   previousCourses: [{
     start: {
@@ -88,7 +93,7 @@ const studentSchema = mongoose.Schema({
   },
   state: {
     type: String,
-    // required: true,
+    default: "NA"
   },
   extended: {
     type: Boolean,
