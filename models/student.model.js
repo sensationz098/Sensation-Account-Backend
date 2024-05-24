@@ -25,6 +25,7 @@ const studentSchema = mongoose.Schema({
   },
   isLifetime: {
     type: String,
+    default: 'false'
   },
   course: {
     type: String,
