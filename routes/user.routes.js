@@ -331,7 +331,7 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
         student.extended = true;
 
         // Validate and parse additional course duration, amount, and date_of_payment from the request body
-        const { additionalMonths, amount, date_of_payment } = req.body;
+        const { additionalMonths, amount, date_of_payment, NewReceipt } = req.body;
 
         if (!additionalMonths || isNaN(additionalMonths) || additionalMonths <= 0) {
             return res.status(400).json({ message: 'Invalid or missing additional course duration' });
@@ -345,6 +345,10 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
             return res.status(400).json({ message: 'Invalid or missing date_of_payment' });
         }
 
+        if(!NewReceipt){
+            return res.status(400).json({message: 'Invalid or missing Receipt'})
+        }
+
         // Calculate the new end date based on the additional months
         const newEndDate = new Date(student.courseEndDate);
         newEndDate.setFullYear(newEndDate.getFullYear(), newEndDate.getMonth() + additionalMonths);
@@ -356,11 +360,6 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
         const formattedEndDate = newEndDate.toISOString().substr(0, 10);
         student.courseEndDate = formattedEndDate;
 
-        // Log information for debugging
-        // console.log('Current course end date:', student.courseEndDate);
-        // console.log('Additional months:', additionalMonths);
-        // console.log('New end date:', newEndDate);
-
         // Record the previous course details
         student.previousCourses.push({
             start: currentCourse.start,
@@ -368,6 +367,7 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
             amount: amount,
             extendedBy: additionalMonths,
             date_of_payment: new Date(date_of_payment),
+            NewReceipt: NewReceipt
         });
 
         // Save the changes to the database
@@ -1076,7 +1076,7 @@ router.get('/students/count', async (req, res) => {
 });
 
 
-router.delete('/students/all', async (req, res) => {
+router.delete('/students/all', authenticateUser, async (req, res) => {
     try {
       const result = await studentModel.deleteMany({});
       res.json({ message: "All student data deleted successfully", deletedCount: result.deletedCount });
@@ -1085,5 +1085,23 @@ router.delete('/students/all', async (req, res) => {
       res.status(500).json({ message: "Server Error" });
     }
   });
+
+
+
+  // Endpoint to retrieve the latest receipt number
+router.get('/students/latest', async (req, res) => {
+    try {
+        // Find the most recent student record based on receipt number
+        const latestStudent = await Student.findOne().sort({ receiptNumber: -1 }).limit(1);
+        let latestReceiptNumber = 0;
+        if (latestStudent) {
+            latestReceiptNumber = latestStudent.receiptNumber;
+        }
+        res.json({ latestReceiptNumber });
+    } catch (err) {
+        console.error('Error retrieving latest receipt number:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 module.exports = router;

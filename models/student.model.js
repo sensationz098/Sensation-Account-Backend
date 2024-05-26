@@ -81,6 +81,9 @@ const studentSchema = mongoose.Schema({
       type: Date,
       required: true,
     },
+    NewReceipt: {
+      type: String,
+    },
     createdAt: {
       type: Date,
       default: Date.now(),
