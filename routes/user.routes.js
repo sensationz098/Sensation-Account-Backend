@@ -1088,20 +1088,53 @@ router.delete('/students/all', authenticateUser, async (req, res) => {
 
 
 
-  // Endpoint to retrieve the latest receipt number
-router.get('/students/latest', async (req, res) => {
+  router.get('/students/latest-receipt', async (req, res) => {
     try {
-        // Find the most recent student record based on receipt number
-        const latestStudent = await Student.findOne().sort({ receiptNumber: -1 }).limit(1);
-        let latestReceiptNumber = 0;
-        if (latestStudent) {
-            latestReceiptNumber = latestStudent.receiptNumber;
+      const result = await studentModel.aggregate([
+        {
+          $project: {
+            receipt: { $toInt: "$receipt" },
+            previousCoursesReceipts: {
+              $map: {
+                input: "$previousCourses",
+                as: "course",
+                in: { $toInt: "$$course.NewReceipt" }
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            allReceipts: {
+              $concatArrays: [
+                [{ $ifNull: ["$receipt", 0] }],
+                { $ifNull: ["$previousCoursesReceipts", []] }
+              ]
+            }
+          }
+        },
+        { $unwind: "$allReceipts" },
+        {
+          $group: {
+            _id: null,
+            latestReceipt: { $max: "$allReceipts" }
+          }
         }
-        res.json({ latestReceiptNumber });
-    } catch (err) {
-        console.error('Error retrieving latest receipt number:', err);
-        res.status(500).json({ error: 'Internal server error' });
+      ]);
+  
+      const latestReceipt = result.length ? result[0].latestReceipt : 0;
+  
+      res.send({ latestReceipt: latestReceipt.toString() });
+  
+    } catch (error) {
+      console.error('Error fetching latest receipt:', error);
+      res.status(500).send('Internal Server Error');
     }
-});
+  });
+
+
+
+
+
 
 module.exports = router;
