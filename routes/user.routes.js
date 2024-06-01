@@ -793,7 +793,33 @@ const setFilterCriteria = (req) => {
             }
         }
     }
-    
+
+    if (!isEmpty(req.query.creationDate)) {
+        const parsedDate = new Date(req.query.creationDate);
+        if (!isNaN(parsedDate.valueOf())) {
+            const startOfDay = new Date(parsedDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(parsedDate.setHours(23, 59, 59, 999));
+            filterCriteria['$or'] = [
+                { 'createdAt': { $gte: startOfDay, $lt: endOfDay } },
+                { 'previousCourses.createdAt': { $gte: startOfDay, $lt: endOfDay } }
+            ];
+        }
+    }
+
+    if (!isEmpty(req.query.PaymentDate)) {
+        const parsedDate = new Date(req.query.PaymentDate);
+        if (!isNaN(parsedDate.valueOf())) {
+            const startOfDay = new Date(parsedDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(parsedDate.setHours(23, 59, 59, 999));
+            filterCriteria['$or'] = [
+                { 'date_of_payment': { $gte: startOfDay, $lt: endOfDay } },
+                { 'previousCourses.date_of_payment': { $gte: startOfDay, $lt: endOfDay } }
+            ];
+        }
+    }
+
+
+
     if (!isEmpty(req.query.coursename)) {
         if (req.query.coursename.toLowerCase() === 'null') {
             filterCriteria['course'] = null; // Set course to null
@@ -803,24 +829,9 @@ const setFilterCriteria = (req) => {
     }
     
 
-    if (!isEmpty(req.query.creationDate)) {
-        const parsedDate = new Date(req.query.creationDate);
-        if (!isNaN(parsedDate.valueOf())) {
-            filterCriteria['createdAt'] = { $eq: parsedDate };
-        }
-    }
 
     if (!isNaN(req.query.fees) && req.query.fees !== null && req.query.fees !== '') {
         filterCriteria['fee'] = { $eq: parseInt(req.query.fees) };
-    }
-
-    if (req.query.extended !== undefined) {
-        const extended = req.query.extended.toLowerCase() === 'true';
-        filterCriteria['extended'] = extended;
-    }
-
-    if (!isEmpty(req.query.name)) {
-        filterCriteria['name'] = { $regex: new RegExp(req.query.name, 'i') };
     }
 
 
@@ -1123,7 +1134,6 @@ router.delete('/students/all', authenticateUser, async (req, res) => {
       ]);
   
       const latestReceipt = result.length ? result[0].latestReceipt : 0;
-  
       res.send({ latestReceipt: latestReceipt.toString() });
   
     } catch (error) {
