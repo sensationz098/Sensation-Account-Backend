@@ -142,9 +142,8 @@ router.post('/student/add', authenticateUser, async (req, res) => {
         const userId = req.user.userId;
         const user = await userModel.findById(userId);
 
-        const { name, email, contact, assignedUserId, isLifetime, course, timing, date_of_payment, state, courseStartDate,Teacher, courseEndDate, fee, CourseDuration, receipt,  previousCourses } = req.body;
+        const { name, email, contact, assignedUserId, isLifetime,  course,  timing,  date_of_payment,  state,  courseStartDate,  Teacher,  courseEndDate,  fee,  CourseDuration,  receipt,  previousCourses } = req.body;
 
-        // Check if a student with the same contact and course already exists
         const existingStudent = await studentModel.findOne({ contact, course });
 
         if (existingStudent) {
@@ -261,7 +260,7 @@ router.get('/student/:id', authenticateUser,async(req,res) => {
 
 router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
     const { studentId } = req.params;
-    const { name, email, contact, course, batch, timing, date_of_payment, state, courseStartDate, courseEndDate, fee, CourseDuration, Teacher, previousCourses } = req.body;
+    const { name, email, contact, course, assignedUserId, batch, timing, date_of_payment, state, courseStartDate, courseEndDate, fee, CourseDuration, Teacher, previousCourses } = req.body;
   
     try {
       const existingStudent = await studentModel.findById(studentId);
@@ -274,6 +273,7 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
       if (email) existingStudent.email = email;
       if (contact) existingStudent.contact = contact;
       if (course) existingStudent.course = course;
+      if (assignedUserId) existingStudent.assignedUserId = assignedUserId;
       if (batch) existingStudent.batch = batch;
       if (timing) existingStudent.timing = timing;
       if (date_of_payment) existingStudent.date_of_payment = date_of_payment;
