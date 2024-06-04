@@ -144,11 +144,11 @@ router.post('/student/add', authenticateUser, async (req, res) => {
 
         const { name, email, contact, assignedUserId, isLifetime,  course,  timing,  date_of_payment,  state,  courseStartDate,  Teacher,  courseEndDate,  fee,  CourseDuration,  receipt,  previousCourses } = req.body;
 
-        const existingStudent = await studentModel.findOne({ contact, course });
+        // const existingStudent = await studentModel.findOne({ contact, course });
 
-        if (existingStudent) {
-            return res.status(400).json({ message: 'Student already exists with the same course you are adding.' });
-        }
+        // if (existingStudent) {
+        //     return res.status(400).json({ message: 'Student already exists with the same course you are adding.' });
+        // }
 
         // Create a new student instance
         const student = new studentModel({
@@ -848,7 +848,6 @@ const setFilterCriteria = (req) => {
 
     return filterCriteria;
 };
-
 
 
 router.get("/displaydownload", authenticateUser, async (req, res) => {
