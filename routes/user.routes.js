@@ -302,7 +302,7 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
 
 
 
-router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
+  router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
     try {
         // Extract user ID from the authenticated user
         const userId = req.user.userId;
@@ -333,7 +333,7 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
         // Validate and parse additional course duration, amount, and date_of_payment from the request body
         const { additionalMonths, amount, date_of_payment, NewReceipt } = req.body;
 
-        if (!additionalMonths || isNaN(additionalMonths) || additionalMonths <= 0) {
+        if (additionalMonths === undefined || isNaN(additionalMonths) || additionalMonths < 0) {
             return res.status(400).json({ message: 'Invalid or missing additional course duration' });
         }
 
@@ -345,20 +345,22 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
             return res.status(400).json({ message: 'Invalid or missing date_of_payment' });
         }
 
-        if(!NewReceipt){
-            return res.status(400).json({message: 'Invalid or missing Receipt'})
+        if (!NewReceipt) {
+            return res.status(400).json({ message: 'Invalid or missing Receipt' });
         }
 
         // Calculate the new end date based on the additional months
         const newEndDate = new Date(student.courseEndDate);
         newEndDate.setFullYear(newEndDate.getFullYear(), newEndDate.getMonth() + additionalMonths);
 
-        // Update course details
-        student.CourseDuration += additionalMonths;
-        
-        // Format newEndDate to 'YYYY-MM-DD' format
-        const formattedEndDate = newEndDate.toISOString().substr(0, 10);
-        student.courseEndDate = formattedEndDate;
+        // Update course details if additionalMonths is greater than 0
+        if (additionalMonths > 0) {
+            student.CourseDuration += additionalMonths;
+            
+            // Format newEndDate to 'YYYY-MM-DD' format
+            const formattedEndDate = newEndDate.toISOString().substr(0, 10);
+            student.courseEndDate = formattedEndDate;
+        }
 
         // Record the previous course details
         student.previousCourses.push({
