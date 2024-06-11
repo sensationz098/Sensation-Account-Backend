@@ -337,7 +337,7 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
             return res.status(400).json({ message: 'Invalid or missing additional course duration' });
         }
 
-        if (!amount || isNaN(amount) || amount <= 0) {
+        if (!amount || isNaN(amount) || amount < 0) {
             return res.status(400).json({ message: 'Invalid or missing amount' });
         }
 
