@@ -18,9 +18,6 @@ const Teachers = require('./routes/teachers.routes.js')
 const Upload = require('./routes/fileUpload.routes.js')
 
 
-
-
-
 app.use('/auth', authRoute)
 app.use('/user', UserProfile)
 app.use('/courses', Courses)
@@ -43,6 +40,3 @@ app.listen(process.env.PORT, async () => {
     }
     console.log(`Server is running on ${process.env.PORT}`)
 })
-
-
-

@@ -298,11 +298,11 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
       console.error(err);
       return res.status(500).json({ msg: 'Internal Server Error' });
     }
-  });
+});
 
 
 
-  router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
+router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
     try {
         // Extract user ID from the authenticated user
         const userId = req.user.userId;
@@ -555,7 +555,6 @@ router.get('/students/filter', authenticateUser, async (req, res) => {
 
 
 
-// To ASSIGNED A USER TO THE STUDENT FROM ADMIN SIDE
 router.post('/admin/student/assignUser', authenticateUser, async (req, res) => {
     try {
         const { studentId, assignUserId } = req.body;
@@ -843,6 +842,28 @@ const setFilterCriteria = (req) => {
     const lastTenDigits = contactDigits.slice(-10); // Extract last 10 digits
     filterCriteria['contact'] = { $regex: new RegExp(lastTenDigits, 'i') };
 }
+
+
+if (!isEmpty(req.query.teacher)) {
+    if (req.query.teacher.toLowerCase() === 'null') {
+        filterCriteria['Teacher'] = null; // Set course to null
+    } else {
+        filterCriteria['Teacher'] = { $regex: new RegExp(req.query.teacher, 'i') };
+    }
+}
+
+
+if (!isEmpty(req.query.timing)) {
+    if (req.query.timing.toLowerCase() === 'null') {
+        filterCriteria['timing'] = null; // Set course to null
+    } else {
+        // Escape special characters in timing before using in regex
+        const escapedTiming = req.query.timing.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        filterCriteria['timing'] = { $regex: new RegExp(escapedTiming, 'i') };
+    }
+}
+
+
     // Remove properties with empty values
     Object.keys(filterCriteria).forEach(key => isEmpty(filterCriteria[key]) && delete filterCriteria[key]);
 
@@ -850,6 +871,7 @@ const setFilterCriteria = (req) => {
 
     return filterCriteria;
 };
+
 
 
 router.get("/displaydownload", authenticateUser, async (req, res) => {
@@ -1076,6 +1098,7 @@ router.get('/students/testing', authenticateUser, async (req, res) => {
 });
 
 
+
 router.get('/students/count', async (req, res) => {
     try {
       // Count total students
@@ -1088,6 +1111,7 @@ router.get('/students/count', async (req, res) => {
 });
 
 
+
 router.delete('/students/all', authenticateUser, async (req, res) => {
     try {
       const result = await studentModel.deleteMany({});
@@ -1096,11 +1120,11 @@ router.delete('/students/all', authenticateUser, async (req, res) => {
       console.error(err);
       res.status(500).json({ message: "Server Error" });
     }
-  });
+});
 
 
 
-  router.get('/students/latest-receipt', async (req, res) => {
+router.get('/students/latest-receipt', async (req, res) => {
     try {
       const result = await studentModel.aggregate([
         {
@@ -1141,10 +1165,7 @@ router.delete('/students/all', authenticateUser, async (req, res) => {
       console.error('Error fetching latest receipt:', error);
       res.status(500).send('Internal Server Error');
     }
-  });
-
-
-
+});
 
 
 
