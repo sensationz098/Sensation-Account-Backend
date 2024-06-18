@@ -260,7 +260,7 @@ router.get('/student/:id', authenticateUser,async(req,res) => {
 
 router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
     const { studentId } = req.params;
-    const { name, email, contact, course, assignedUserId, batch, timing, date_of_payment, state, courseStartDate, courseEndDate, fee, CourseDuration, Teacher, previousCourses } = req.body;
+    const { name, email, contact, receipt, course, assignedUserId, batch, timing, date_of_payment, state, courseStartDate, courseEndDate, fee, CourseDuration, Teacher, previousCourses } = req.body;
   
     try {
       const existingStudent = await studentModel.findById(studentId);
@@ -272,6 +272,7 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
       if (name) existingStudent.name = name;
       if (email) existingStudent.email = email;
       if (contact) existingStudent.contact = contact;
+      if (receipt) existingStudent.receipt = receipt;
       if (course) existingStudent.course = course;
       if (assignedUserId) existingStudent.assignedUserId = assignedUserId;
       if (batch) existingStudent.batch = batch;
