@@ -1153,8 +1153,15 @@ router.get('/students/latest-receipt', async (req, res) => {
         { $unwind: "$allReceipts" },
         {
           $group: {
+            _id: "$_id",
+            uniqueReceipts: { $addToSet: "$allReceipts" }
+          }
+        },
+        { $unwind: "$uniqueReceipts" },
+        {
+          $group: {
             _id: null,
-            latestReceipt: { $max: "$allReceipts" }
+            latestReceipt: { $max: "$uniqueReceipts" }
           }
         }
       ]);
@@ -1166,7 +1173,8 @@ router.get('/students/latest-receipt', async (req, res) => {
       console.error('Error fetching latest receipt:', error);
       res.status(500).send('Internal Server Error');
     }
-});
+  });
+  
 
 
 
