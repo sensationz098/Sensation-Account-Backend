@@ -865,11 +865,11 @@ if (!isEmpty(req.query.timing)) {
 }
 
 
-  // Add filter for receipt
-  if (!isEmpty(req.query.receipt)) {
+ // Add filter for receipt with exact match
+ if (!isEmpty(req.query.receipt)) {
     filterCriteria['$or'] = [
-        { 'receipt': { $regex: new RegExp(req.query.receipt, 'i') } },
-        { 'previousCourses.NewReceipt': { $regex: new RegExp(req.query.receipt, 'i') } }
+        { 'receipt': { $eq: req.query.receipt } },
+        { 'previousCourses.NewReceipt': { $eq: req.query.receipt } }
     ];
 }
 
