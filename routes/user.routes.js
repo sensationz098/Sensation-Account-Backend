@@ -865,6 +865,14 @@ if (!isEmpty(req.query.timing)) {
 }
 
 
+  // Add filter for receipt
+  if (!isEmpty(req.query.receipt)) {
+    filterCriteria['$or'] = [
+        { 'receipt': { $regex: new RegExp(req.query.receipt, 'i') } },
+        { 'previousCourses.NewReceipt': { $regex: new RegExp(req.query.receipt, 'i') } }
+    ];
+}
+
     // Remove properties with empty values
     Object.keys(filterCriteria).forEach(key => isEmpty(filterCriteria[key]) && delete filterCriteria[key]);
 

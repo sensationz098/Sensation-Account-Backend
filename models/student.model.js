@@ -6,6 +6,7 @@ const studentSchema = mongoose.Schema({
   },
   email: {
     type: String,
+    default: 'NA@gmail.com'
   },
   contact: {
     type: String,
@@ -61,6 +62,7 @@ const studentSchema = mongoose.Schema({
   },
   assignedUserName: {
     type: String,
+    default: 'NA'
   },
   previousCourses: [{
     start: {
@@ -83,6 +85,7 @@ const studentSchema = mongoose.Schema({
   },
     NewReceipt: {
       type: String,
+      default: 'NA'
   },
     createdAt: {
       type: Date,
