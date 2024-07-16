@@ -863,6 +863,7 @@ if (!isEmpty(req.query.timing)) {
 }
 
 
+<<<<<<< HEAD
   // Add filter for receipt
     if (!isEmpty(req.query.receipt)) {
         filterCriteria['$or'] = [
@@ -871,6 +872,15 @@ if (!isEmpty(req.query.timing)) {
         ];
     }
 
+=======
+ // Add filter for receipt with exact match
+ if (!isEmpty(req.query.receipt)) {
+    filterCriteria['$or'] = [
+        { 'receipt': { $eq: req.query.receipt } },
+        { 'previousCourses.NewReceipt': { $eq: req.query.receipt } }
+    ];
+}
+>>>>>>> 948f0aae250b78554388537dbd0cc43467b2bb22
 
     // Remove properties with empty values
     Object.keys(filterCriteria).forEach(key => isEmpty(filterCriteria[key]) && delete filterCriteria[key]);
