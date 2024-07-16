@@ -16,6 +16,8 @@ const UserProfile = require('./routes/user.routes.js')
 const Courses = require('./routes/course.routes.js')
 const Teachers = require('./routes/teachers.routes.js')
 const Upload = require('./routes/fileUpload.routes.js')
+const PDFinvoice = require('./routes/pdfinvoice.js')
+
 
 
 app.use('/auth', authRoute)
@@ -23,6 +25,7 @@ app.use('/user', UserProfile)
 app.use('/courses', Courses)
 app.use('/teachers', Teachers)
 app.use('/fileupload', Upload)
+app.use('/invoice', PDFinvoice)
 
 
 app.get('/', (_req,res) => {

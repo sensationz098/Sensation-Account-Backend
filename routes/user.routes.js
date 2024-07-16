@@ -1,7 +1,5 @@
 const express = require('express')
 const exceljs = require('exceljs')
-const moment = require('moment')
-                               
 const router = express.Router()
 const bcrypt = require('bcrypt');
 const {userModel} = require('../models/user.model')
@@ -87,7 +85,7 @@ router.put('/changePassword/:id', authenticateUser, async (req, res) => {
 
         // Check if passwords match
         if (password !== confirmPassword) {
-            return res.status(400).send("Passwords do not match");
+            return res.status(400).send("Passwords didn't match to confirm password not match");
         }
 
         // Hash the new password
@@ -865,6 +863,15 @@ if (!isEmpty(req.query.timing)) {
 }
 
 
+  // Add filter for receipt
+    if (!isEmpty(req.query.receipt)) {
+        filterCriteria['$or'] = [
+            { 'receipt': { $regex: new RegExp(req.query.receipt, 'i') } },
+            { 'previousCourses.NewReceipt': { $regex: new RegExp(req.query.receipt, 'i') } }
+        ];
+    }
+
+
     // Remove properties with empty values
     Object.keys(filterCriteria).forEach(key => isEmpty(filterCriteria[key]) && delete filterCriteria[key]);
 
@@ -1108,18 +1115,6 @@ router.get('/students/count', async (req, res) => {
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'An error occurred while counting students.' });
-    }
-});
-
-
-
-router.delete('/students/all', authenticateUser, async (req, res) => {
-    try {
-      const result = await studentModel.deleteMany({});
-      res.json({ message: "All student data deleted successfully", deletedCount: result.deletedCount });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server Error" });
     }
 });
 
