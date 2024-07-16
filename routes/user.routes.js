@@ -1,5 +1,7 @@
 const express = require('express')
 const exceljs = require('exceljs')
+const moment = require('moment')
+                               
 const router = express.Router()
 const bcrypt = require('bcrypt');
 const {userModel} = require('../models/user.model')
@@ -85,7 +87,7 @@ router.put('/changePassword/:id', authenticateUser, async (req, res) => {
 
         // Check if passwords match
         if (password !== confirmPassword) {
-            return res.status(400).send("Passwords didn't match to confirm password not match");
+            return res.status(400).send("Passwords do not match");
         }
 
         // Hash the new password
@@ -863,16 +865,6 @@ if (!isEmpty(req.query.timing)) {
 }
 
 
-<<<<<<< HEAD
-  // Add filter for receipt
-    if (!isEmpty(req.query.receipt)) {
-        filterCriteria['$or'] = [
-            { 'receipt': { $regex: new RegExp(req.query.receipt, 'i') } },
-            { 'previousCourses.NewReceipt': { $regex: new RegExp(req.query.receipt, 'i') } }
-        ];
-    }
-
-=======
  // Add filter for receipt with exact match
  if (!isEmpty(req.query.receipt)) {
     filterCriteria['$or'] = [
@@ -880,7 +872,6 @@ if (!isEmpty(req.query.timing)) {
         { 'previousCourses.NewReceipt': { $eq: req.query.receipt } }
     ];
 }
->>>>>>> 948f0aae250b78554388537dbd0cc43467b2bb22
 
     // Remove properties with empty values
     Object.keys(filterCriteria).forEach(key => isEmpty(filterCriteria[key]) && delete filterCriteria[key]);
@@ -1127,6 +1118,7 @@ router.get('/students/count', async (req, res) => {
       res.status(500).json({ message: 'An error occurred while counting students.' });
     }
 });
+
 
 
 
