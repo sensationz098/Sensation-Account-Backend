@@ -887,7 +887,7 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
     try {
         const filterCriteria = setFilterCriteria(req);
         const page = req.query.page ? parseInt(req.query.page) : 1; // Default page is 1
-        const limit = 500; // Limit of records per page
+        const limit = 300; // Limit of records per page
 
         const skip = (page - 1) * limit; // Calculate number of records to skip
 
