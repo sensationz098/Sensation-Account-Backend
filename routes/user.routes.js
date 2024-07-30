@@ -356,7 +356,7 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
 
         // Update course details if additionalMonths is greater than 0
         if (additionalMonths > 0) {
-            student.CourseDuration += additionalMonths;
+            student.CourseDuration = (parseInt(student.CourseDuration) + additionalMonths)
             
             // Format newEndDate to 'YYYY-MM-DD' format
             const formattedEndDate = newEndDate.toISOString().substr(0, 10);
