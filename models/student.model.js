@@ -53,7 +53,7 @@ const studentSchema = mongoose.Schema({
     default: 'NA'
   },
   CourseDuration: {
-    type: String,
+    type: Number,
     default: 'NA'
   },
   Teacher: {

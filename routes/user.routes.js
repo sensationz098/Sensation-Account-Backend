@@ -952,7 +952,7 @@ router.get("/displaydownload", authenticateUser, async (req, res) => {
             const totalPages = Math.ceil(totalRecords / limit);
 
             // Send paginated data and total pages to client
-            res.json({ currentPage: page, totalPages: totalPages, students });
+            res.json({ currentPage: page, totalPages: totalPages, length: students.length, students,  });
         }
     } catch (error) {
         console.error('Error:', error);
