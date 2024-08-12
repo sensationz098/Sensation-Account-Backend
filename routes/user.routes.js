@@ -303,6 +303,92 @@ router.put('/student/edit/:studentId', authenticateUser, async (req, res) => {
 
 
 
+// router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
+//     try {
+//         // Extract user ID from the authenticated user
+//         const userId = req.user.userId;
+
+//         // Retrieve user details to check for role (optional, depending on your requirements)
+//         const user = await userModel.findById(userId);
+
+//         // Extract student ID from the request parameters
+//         const studentId = req.params.studentId;
+
+//         // Find the student by ID
+//         const student = await studentModel.findById(studentId);
+
+//         if (!student) {
+//             return res.status(404).json({ message: 'Student not found' });
+//         }
+
+//         // Capture the current course details before making any changes
+//         const currentCourse = {
+//             start: new Date(student.courseStartDate),
+//             end: new Date(student.courseEndDate),
+//         };
+
+//         // Assign the userId to the student
+//         student.userId = userId;
+//         student.extended = true;
+
+//         // Validate and parse additional course duration, amount, and date_of_payment from the request body
+//         const { additionalMonths, amount, date_of_payment, NewReceipt } = req.body;
+
+//         if (additionalMonths === undefined || isNaN(additionalMonths) || additionalMonths < 0) {
+//             return res.status(400).json({ message: 'Invalid or missing additional course duration' });
+//         }
+
+//         if (!amount || isNaN(amount) || amount < 0) {
+//             return res.status(400).json({ message: 'Invalid or missing amount' });
+//         }
+
+//         if (!date_of_payment || isNaN(Date.parse(date_of_payment))) {
+//             return res.status(400).json({ message: 'Invalid or missing date_of_payment' });
+//         }
+
+//         if (!NewReceipt) {
+//             return res.status(400).json({ message: 'Invalid or missing Receipt' });
+//         }
+
+//         // Calculate the new end date based on the additional months
+//         const newEndDate = new Date(student.courseEndDate);
+//         newEndDate.setFullYear(newEndDate.getFullYear(), newEndDate.getMonth() + additionalMonths);
+
+//         // Update course details if additionalMonths is greater than 0
+//         if (additionalMonths > 0) {
+//             student.CourseDuration = (parseInt(student.CourseDuration) + additionalMonths)
+            
+//             // Format newEndDate to 'YYYY-MM-DD' format
+//             const formattedEndDate = newEndDate.toISOString().substr(0, 10);
+//             student.courseEndDate = formattedEndDate;
+//         }
+
+//         // Record the previous course details
+//         student.previousCourses.push({
+//             start: currentCourse.start,
+//             end: currentCourse.end,
+//             amount: amount,
+//             extendedBy: additionalMonths,
+//             date_of_payment: new Date(date_of_payment),
+//             NewReceipt: NewReceipt
+//         });
+
+//         // Save the changes to the database
+//         await student.save();
+
+//         // Respond with a success message or the updated student details
+//         res.status(200).json({
+//             message: 'Course extended successfully',
+//             updatedStudent: student,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Internal Server Error' });
+//     }
+// });
+
+
+
 router.put('/student/extend-course/:studentId', authenticateUser, async (req, res) => {
     try {
         // Extract user ID from the authenticated user
@@ -331,8 +417,8 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
         student.userId = userId;
         student.extended = true;
 
-        // Validate and parse additional course duration, amount, and date_of_payment from the request body
-        const { additionalMonths, amount, date_of_payment, NewReceipt } = req.body;
+        // Validate and parse additional course duration, amount, date_of_payment, and new receipt from the request body
+        const { additionalMonths, amount, date_of_payment, NewReceipt, email, state } = req.body;
 
         if (additionalMonths === undefined || isNaN(additionalMonths) || additionalMonths < 0) {
             return res.status(400).json({ message: 'Invalid or missing additional course duration' });
@@ -352,15 +438,12 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
 
         // Calculate the new end date based on the additional months
         const newEndDate = new Date(student.courseEndDate);
-        newEndDate.setFullYear(newEndDate.getFullYear(), newEndDate.getMonth() + additionalMonths);
+        newEndDate.setMonth(newEndDate.getMonth() + additionalMonths);
 
         // Update course details if additionalMonths is greater than 0
         if (additionalMonths > 0) {
-            student.CourseDuration = (parseInt(student.CourseDuration) + additionalMonths)
-            
-            // Format newEndDate to 'YYYY-MM-DD' format
-            const formattedEndDate = newEndDate.toISOString().substr(0, 10);
-            student.courseEndDate = formattedEndDate;
+            student.CourseDuration = (parseInt(student.CourseDuration) + additionalMonths);
+            student.courseEndDate = newEndDate.toISOString().substr(0, 10);
         }
 
         // Record the previous course details
@@ -373,13 +456,38 @@ router.put('/student/extend-course/:studentId', authenticateUser, async (req, re
             NewReceipt: NewReceipt
         });
 
+        // Update email and state if provided
+        if (email) student.email = email;
+        if (state) student.state = state;
+
         // Save the changes to the database
         await student.save();
 
         // Respond with a success message or the updated student details
         res.status(200).json({
-            message: 'Course extended successfully',
-            updatedStudent: student,
+            message: 'Course extended and details updated successfully',
+            updatedStudent: {
+                name: student.name,
+                email: student.email,
+                contact: student.contact,
+                receipt: student.receipt,
+                userId: student.userId,
+                assignedUserId: student.assignedUserId,
+                isLifetime: student.isLifetime,
+                course: student.course,
+                timing: student.timing,
+                date_of_payment: student.date_of_payment,
+                courseStartDate: student.courseStartDate,
+                courseEndDate: student.courseEndDate,
+                fee: student.fee,
+                CourseDuration: student.CourseDuration,
+                Teacher: student.Teacher,
+                assignedUserName: student.assignedUserName,
+                previousCourses: student.previousCourses,
+                createdAt: student.createdAt,
+                state: student.state,
+                extended: student.extended
+            }
         });
     } catch (error) {
         console.error(error);
