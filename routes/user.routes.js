@@ -123,10 +123,10 @@ router.get('/allusers', authenticateUser, async (req, res) => {
 
         if (id) {
             const userIds = id.split(',');
-            const users = await userModel.find({ _id: { $in: userIds } });
+            const users = await userModel.find({ _id: { $in: userIds } }).sort({username:1});
             return res.status(200).json(users);
         } else {
-            const users = await userModel.find();
+            const users = await userModel.find().sort({username:1});
             return res.status(200).json(users);
         }
     } catch (err) {
