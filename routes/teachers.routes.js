@@ -15,7 +15,7 @@ router.post('/add',authenticateUser, async (req, res) => {
 // Get all teachers
 router.get('/', authenticateUser, async (req, res) => {
     try {
-        const teachers = await teacherModel.find();
+        const teachers = await teacherModel.find().sort({TeacherName: 1});
         res.json(teachers);
     } catch (err) {
         res.status(500).json({ message: err.message });
