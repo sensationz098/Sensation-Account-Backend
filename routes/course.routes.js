@@ -3,8 +3,6 @@ const router = expres.Router()
 const {courseModel} = require('../models/courses.model');
 const {authenticateUser} = require('../middlewares/auth.middleware')
 
-
-
 // Route to create a new course
 router.post('/add', authenticateUser, async(req,res) => {
     try{
