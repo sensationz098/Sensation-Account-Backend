@@ -30,12 +30,12 @@ app.get("/", (_req, res) => {
   console.log("Working");
 });
 
-app.listen(process.env.PORT, async () => {
+app.listen(3000, async () => {
   try {
     await connection;
     console.log(`Connected to the DB successfully`);
   } catch (err) {
     console.log(err.message);
   }
-  console.log(`Server is running on ${process.env.PORT}`);
+  console.log(`Server is running on 3000`);
 });

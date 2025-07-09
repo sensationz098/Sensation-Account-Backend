@@ -1,15 +1,1 @@
-# SensationZ Media & Arts Project 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# SensationZ Media & Arts Project
