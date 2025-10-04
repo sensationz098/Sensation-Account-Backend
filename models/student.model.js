@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const studentSchema = mongoose.Schema({
   name: {
@@ -6,35 +6,35 @@ const studentSchema = mongoose.Schema({
   },
   email: {
     type: String,
-    default: 'NA@gmail.com'
+    default: "NA@gmail.com",
   },
   contact: {
     type: String,
     default: null,
   },
-  receipt :  {
+  receipt: {
     type: String,
-    default: 'NA'
+    default: "NA",
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
   },
   assignedUserId: {
     type: String,
-    default: 'NA',
+    default: "NA",
   },
   isLifetime: {
     type: String,
-    default: 'false'
+    default: "false",
   },
   course: {
     type: String,
-    default: 'NA'
+    default: "NA",
   },
   timing: {
     type: String,
-    default: 'Not Confirmed'
+    default: "Not Confirmed",
   },
   date_of_payment: {
     type: Date,
@@ -50,49 +50,51 @@ const studentSchema = mongoose.Schema({
   },
   fee: {
     type: String,
-    default: 'NA'
+    default: "NA",
   },
   CourseDuration: {
     type: Number,
-    default: 'NA'
+    default: "NA",
   },
   Teacher: {
     type: String,
-    default: "Not Confirmed"
+    default: "Not Confirmed",
   },
   assignedUserName: {
     type: String,
-    default: 'NA'
+    default: "NA",
   },
-  previousCourses: [{
-    start: {
-      type: Date,
-      default: null,
-  },
-    end: {
-      type: Date,
-      default: null,
-  },
-    amount: {
-      type: Number,
-  },
-    extendedBy: {
-      type: Number,
-  },
-    date_of_payment: {
-      type: Date,
-      required: true,
-  },
-    NewReceipt: {
-      type: String,
-      default: 'NA'
-  },
-    createdAt: {
-      type: Date,
-      default: Date.now(),
-      required: true,
-  },
-  }],
+  previousCourses: [
+    {
+      start: {
+        type: Date,
+        default: null,
+      },
+      end: {
+        type: Date,
+        default: null,
+      },
+      amount: {
+        type: Number,
+      },
+      extendedBy: {
+        type: Number,
+      },
+      date_of_payment: {
+        type: Date,
+        required: true,
+      },
+      NewReceipt: {
+        type: String,
+        default: "NA",
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now(),
+        required: true,
+      },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now(),
@@ -100,16 +102,30 @@ const studentSchema = mongoose.Schema({
   },
   state: {
     type: String,
-    default: "NA"
+    default: "NA",
   },
   extended: {
     type: Boolean,
     default: false,
   },
+  batchStart: {
+    type: String,
+    required: true,
+  },
+  classessDays: {
+    type: String,
+    required: true,
+  },
+  batchStart: {
+    type: String,
+    required: true,
+  },
+  classessDays: {
+    type: String,
+    required: true,
+  },
 });
 
-
-const studentModel = mongoose.model('Student', studentSchema);
+const studentModel = mongoose.model("Student", studentSchema);
 
 module.exports = { studentModel };
-
