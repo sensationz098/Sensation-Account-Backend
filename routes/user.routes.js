@@ -332,6 +332,9 @@ router.put("/student/edit/:studentId", authenticateUser, async (req, res) => {
       existingStudent.previousCourses = previousCourses; // Fix here
     }
 
+    if (batchStart) existingStudent.batchStart = batchStart;
+    if (classessDays) existingStudent.classessDays = classessDays;
+
     // Save the updated student details
     const updatedStudent = await existingStudent.save();
 
