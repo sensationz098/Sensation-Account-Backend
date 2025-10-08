@@ -82,7 +82,7 @@ const studentSchema = mongoose.Schema({
       },
       date_of_payment: {
         type: Date,
-        required: true,
+        // required: true,
       },
       NewReceipt: {
         type: String,
@@ -91,14 +91,14 @@ const studentSchema = mongoose.Schema({
       createdAt: {
         type: Date,
         default: Date.now(),
-        required: true,
+        // required: true,
       },
     },
   ],
   createdAt: {
     type: Date,
     default: Date.now(),
-    required: true,
+    // required: true,
   },
   state: {
     type: String,
@@ -110,19 +110,19 @@ const studentSchema = mongoose.Schema({
   },
   batchStart: {
     type: String,
-    required: true,
+    // required: true,
   },
   classessDays: {
     type: String,
-    required: true,
+    // required: true,
   },
   batchStart: {
     type: String,
-    required: true,
+    // required: true,
   },
   classessDays: {
     type: String,
-    required: true,
+    // required: true,
   },
 });
 
